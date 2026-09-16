@@ -172,6 +172,7 @@ h1{font-family:'Fraunces',serif;font-size:24px;font-weight:600;margin:0 0 2px;li
     <div class="tbtn" id="exitEditBtn">✓ Selesai, kembali ke tampilan lihat</div>
   </div>
 
+  <div id="realtimeBadge" style="font-size:12px;text-align:center;color:var(--ink-soft);margin:4px 0 8px;">● Menghubungkan database &amp; realtime…</div>
   <div class="status-msg" id="statusMsg"></div>
   <p class="hint" id="hintText">Halaman ini mode lihat saja. Ketuk "Masuk mode edit" dan masukkan PIN untuk mengubah status atau menambah/menggeser pin.</p>
 </div>
@@ -180,7 +181,7 @@ h1{font-family:'Fraunces',serif;font-size:24px;font-weight:600;margin:0 0 2px;li
 <script>
 (function(){
   // Ganti PIN di bawah ini dengan PIN pilihan Anda sendiri.
-  var EDIT_PASSCODE = '3008';
+  var EDIT_PASSCODE = '1234';
   var SUPABASE_URL = 'https://awdpnkqyxxbluvjrqitt.supabase.co';
   var SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_AtV2u1FSErpUT4LdG0eVdA_PU7DeLY6';
   var supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
@@ -225,6 +226,18 @@ h1{font-family:'Fraunces',serif;font-size:24px;font-weight:600;margin:0 0 2px;li
     }
   }
 
+  function rowFromUnit(siteId, unit){
+    return {
+      id: unit.id,
+      site_id: siteId,
+      unit_number: unit.id,
+      x: Number(unit.x),
+      y: Number(unit.y),
+      status: unit.status,
+      updated_at: new Date().toISOString()
+    };
+  }
+
   async function loadAllStates(){
     var results = await Promise.all(SITES.map(function(site){
       return supabaseClient
@@ -234,9 +247,11 @@ h1{font-family:'Fraunces',serif;font-size:24px;font-weight:600;margin:0 0 2px;li
         .order('created_at', { ascending: true });
     }));
 
+    var hasError = false;
     results.forEach(function(result, index){
       var site = SITES[index];
       if(result.error){
+        hasError = true;
         console.error('Supabase load error:', result.error);
         siteState[site.id] = { units: [] };
         return;
@@ -250,35 +265,148 @@ h1{font-family:'Fraunces',serif;font-size:24px;font-weight:600;margin:0 0 2px;li
 
     renderTabs();
     render();
+
+    if(hasError) showMsg('Sebagian data gagal dimuat dari Supabase.', true);
   }
 
+  // Simpan SATU unit saja. Tidak menghapus/menginsert ulang seluruh cluster.
+  async function saveUnit(unit, notify){
+    var site = currentSite();
+    var result = await supabaseClient
+      .from('site_plan_units')
+      .upsert(rowFromUnit(site.id, unit), { onConflict: 'id' });
+
+    if(result.error){
+      console.error('Supabase unit save error:', result.error);
+      if(notify) showMsg('Gagal menyimpan perubahan online.', true);
+      return false;
+    }
+
+    if(notify) showMsg('Perubahan berhasil disimpan online.', false);
+    return true;
+  }
+
+  // Hapus SATU unit saja.
+  async function deleteUnit(unitId, notify){
+    var result = await supabaseClient
+      .from('site_plan_units')
+      .delete()
+      .eq('id', unitId);
+
+    if(result.error){
+      console.error('Supabase unit delete error:', result.error);
+      if(notify) showMsg('Gagal menghapus unit online.', true);
+      return false;
+    }
+
+    if(notify) showMsg('Unit berhasil dihapus online.', false);
+    return true;
+  }
+
+  // Dipertahankan agar fungsi lama tetap kompatibel.
   async function saveCurrentState(notify){
     var site = currentSite();
     var rows = currentState().units.map(function(unit){
-      return {
-        id: unit.id,
-        site_id: site.id,
-        unit_number: unit.id,
-        x: unit.x,
-        y: unit.y,
-        status: unit.status,
-        updated_at: new Date().toISOString()
-      };
+      return rowFromUnit(site.id, unit);
     });
 
-    var result = await supabaseClient.from('site_plan_units').delete().eq('site_id', site.id);
-    if(!result.error && rows.length){
-      result = await supabaseClient.from('site_plan_units').insert(rows);
+    if(!rows.length){
+      if(notify) showMsg('Tidak ada unit untuk disimpan.', false);
+      return true;
     }
 
+    var result = await supabaseClient
+      .from('site_plan_units')
+      .upsert(rows, { onConflict: 'id' });
+
     if(result.error){
-      console.error('Supabase save error:', result.error);
+      console.error('Supabase bulk save error:', result.error);
       if(notify) showMsg('Gagal menyimpan online. Pastikan SQL Supabase sudah dijalankan.', true);
       return false;
     }
 
     if(notify) showMsg('Perubahan berhasil disimpan online.', false);
     return true;
+  }
+
+  // Realtime: perubahan INSERT/UPDATE/DELETE dari perangkat lain
+  // langsung disinkronkan ke tampilan tanpa refresh.
+  var realtimeChannel = null;
+
+  function startRealtime(){
+    if(realtimeChannel){
+      try { supabaseClient.removeChannel(realtimeChannel); } catch(e) {}
+    }
+
+    realtimeChannel = supabaseClient
+      .channel('site-plan-units-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'site_plan_units' },
+        function(payload){
+          var row = payload.new || payload.old || {};
+
+          if(payload.eventType === 'DELETE'){
+            Object.keys(siteState).forEach(function(siteId){
+              siteState[siteId].units = siteState[siteId].units.filter(function(unit){
+                return unit.id !== row.id;
+              });
+            });
+            render();
+            return;
+          }
+
+          var siteId = row.site_id;
+          if(!siteId || !siteState[siteId]) return;
+
+          var incoming = {
+            id: row.id,
+            x: Number(row.x),
+            y: Number(row.y),
+            status: row.status
+          };
+
+          var units = siteState[siteId].units;
+          var found = false;
+
+          for(var i=0; i<units.length; i++){
+            if(units[i].id === incoming.id){
+              units[i] = incoming;
+              found = true;
+              break;
+            }
+          }
+
+          if(!found) units.push(incoming);
+
+          if(siteId === currentSiteId) render();
+          else renderTabs();
+        }
+      )
+      .subscribe(function(status){
+        var badge = $('realtimeBadge');
+
+        if(status === 'SUBSCRIBED'){
+          console.log('Supabase Realtime aktif.');
+          if(badge){
+            badge.textContent = '● Database online • Realtime aktif';
+            badge.style.color = 'seagreen';
+          }
+        }else if(status === 'CHANNEL_ERROR'){
+          console.error('Supabase Realtime channel error.');
+          if(badge){
+            badge.textContent = '● Database online • Realtime belum aktif';
+            badge.style.color = 'var(--sold)';
+          }
+          showMsg('Realtime belum aktif. Cek konfigurasi Supabase.', true);
+        }else if(status === 'TIMED_OUT'){
+          console.error('Supabase Realtime timed out.');
+          if(badge){
+            badge.textContent = '● Realtime timeout';
+            badge.style.color = 'var(--sold)';
+          }
+        }
+      });
   }
 
   function nextStatus(s){
@@ -409,7 +537,15 @@ h1{font-family:'Fraunces',serif;font-size:24px;font-weight:600;margin:0 0 2px;li
     if(el) el.classList.remove('dragging');
 
     if(moved){
-      saveCurrentState(true);
+      var movedUnit = null;
+      var currentUnits = currentState().units;
+      for(var mi=0; mi<currentUnits.length; mi++){
+        if(currentUnits[mi].id === id){
+          movedUnit = currentUnits[mi];
+          break;
+        }
+      }
+      if(movedUnit) saveUnit(movedUnit, true);
       return;
     }
 
@@ -420,11 +556,11 @@ h1{font-family:'Fraunces',serif;font-size:24px;font-weight:600;margin:0 0 2px;li
 
     if(mode === 'delete'){
       currentState().units = units.filter(function(x){ return x.id !== id; });
-      saveCurrentState(true);
+      deleteUnit(id, true);
       render();
     } else if(mode === 'normal'){
       u.status = nextStatus(u.status);
-      saveCurrentState(true);
+      saveUnit(u, true);
       render();
     }
   }
@@ -439,8 +575,14 @@ h1{font-family:'Fraunces',serif;font-size:24px;font-weight:600;margin:0 0 2px;li
     if(e.target && e.target.classList && e.target.classList.contains('marker')) return;
     var xy = eventXY(e);
     var p = pctFromClientXY(xy.x, xy.y);
-    currentState().units.push({ id: 'u-' + Date.now(), x: p.x, y: p.y, status: 'available' });
-    saveCurrentState(true);
+    var newUnit = {
+      id: 'u-' + Date.now(),
+      x: p.x,
+      y: p.y,
+      status: 'available'
+    };
+    currentState().units.push(newUnit);
+    saveUnit(newUnit, true);
     render();
   }
 
@@ -496,7 +638,9 @@ h1{font-family:'Fraunces',serif;font-size:24px;font-weight:600;margin:0 0 2px;li
     showMsg('Terjadi masalah kecil, coba muat ulang.', true);
   });
 
-  loadAllStates();
+  loadAllStates().then(function(){
+    startRealtime();
+  });
 })();
 </script>
 </body>
