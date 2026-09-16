@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CitraLand Megah — Status Unit</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+:root{
+  --bg:#F5F2EA;
+  --panel:#FFFFFF;
+  --ink:#163832;
+  --ink-soft:#3F5852;
+  --line:#DCD5C4;
+  --terracotta:#C1652F;
+  --available:#5C8A52;
+  --booking:#C9932F;
+  --sold:#A6423A;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;padding:20px 14px 60px;}
+.wrap{max-width:640px;margin:0 auto;}
+header{margin-bottom:14px;}
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.03em;color:var(--terracotta);margin:0 0 4px;}
+h1{font-family:'Fraunces',serif;font-size:24px;font-weight:600;margin:0 0 2px;line-height:1.15;}
+.sub{color:var(--ink-soft);font-size:13px;margin:0;}
+
+.site-tabs{display:flex;gap:8px;margin:14px 0;}
+.site-tab{
+  flex:1;
+  padding:9px 5px;
+  border-radius:10px;
+  border:1.5px solid var(--line);
+  background:var(--panel);
+  color:var(--ink-soft);
+  font-family:'Fraunces',serif;
+  font-weight:600;
+  font-size:clamp(10px,2.8vw,14px);
+  line-height:1.15;
+  text-align:center;
+  cursor:pointer;
+}
+.site-tab.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+
+.stats{display:flex;gap:8px;margin:16px 0;}
+.stat{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 6px;text-align:center;}
+.stat .n{font-family:'Fraunces',serif;font-size:20px;font-weight:600;display:block;}
+.stat .l{font-size:10.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em;}
+.stat.available .n{color:var(--available);}
+.stat.booking .n{color:var(--booking);}
+.stat.sold .n{color:var(--sold);}
+
+.map-box{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#eee;}
+.map-box img{display:block;width:100%;height:auto;-webkit-user-select:none;user-select:none;pointer-events:none;}
+
+.marker{
+  position:absolute;
+  width:28px;height:28px;
+  margin-left:-14px;
+  margin-top:-14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  touch-action:none;
+}
+.marker .dot{
+  width:var(--dot-size,13px);height:var(--dot-size,13px);
+  border-radius:50%;
+  border:1.5px solid #fff;
+  box-shadow:0 1px 2px rgba(0,0,0,.45);
+}
+.marker.available .dot{background:rgba(92,138,82,.90);}
+.marker.booking .dot{background:rgba(201,147,47,.35);}
+.marker.sold .dot{background:var(--sold);}
+.marker.dragging .dot{width:calc(var(--dot-size,13px) + 6px);height:calc(var(--dot-size,13px) + 6px);opacity:.85;}
+
+.dotsize-row{display:none;align-items:center;gap:10px;margin-top:10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;}
+.dotsize-row.show{display:flex;}
+.dotsize-row label{font-size:12px;color:var(--ink-soft);white-space:nowrap;}
+.dotsize-row input[type="range"]{flex:1;}
+.dotsize-row .val{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink);width:28px;text-align:right;}
+
+.legend{display:flex;gap:12px;font-size:11.5px;color:var(--ink-soft);margin:12px 2px 4px;flex-wrap:wrap;}
+.legend span{display:inline-flex;align-items:center;gap:5px;}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+
+.toolbar{display:flex;gap:8px;margin-top:14px;}
+.tbtn{
+  flex:1;
+  padding:11px;
+  border-radius:10px;
+  border:1.5px solid var(--line);
+  background:var(--panel);
+  color:var(--ink);
+  font-family:'Inter',sans-serif;
+  font-size:12.5px;
+  font-weight:500;
+  cursor:pointer;
+  text-align:center;
+}
+.tbtn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+
+.status-msg{text-align:center;font-size:12px;color:var(--ink-soft);height:16px;margin-top:8px;}
+.hint{font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:14px;line-height:1.6;}
+
+.pin-gate{
+  margin-top:14px;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:16px;
+  text-align:center;
+}
+.pin-label{font-size:13px;color:var(--ink-soft);margin:0 0 10px;}
+.pin-row{display:flex;gap:8px;}
+.pin-input{
+  flex:1;
+  border:1.5px solid var(--line);
+  border-radius:10px;
+  padding:11px 12px;
+  font-size:16px;
+  font-family:'IBM Plex Mono',monospace;
+  letter-spacing:.15em;
+  color:var(--ink);
+  background:var(--bg);
+}
+.pin-input:focus{outline:none;border-color:var(--ink);}
+#pinSubmit{flex:0 0 auto;padding:11px 18px;}
+.pin-cancel{font-size:11.5px;color:var(--ink-soft);text-decoration:underline;margin:10px 0 0;cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">CitraLand Megah Batam</p>
+    <h1>Status Unit Kavling</h1>
+    <p class="sub">Pilih cluster, lalu ketuk pin untuk lihat/ubah status.</p>
+  </header>
+
+  <div class="site-tabs" id="siteTabs"></div>
+
+  <div class="stats">
+    <div class="stat available"><span class="n" id="cntAvailable">0</span><span class="l">Tersedia</span></div>
+    <div class="stat booking"><span class="n" id="cntBooking">0</span><span class="l">Booking</span></div>
+    <div class="stat sold"><span class="n" id="cntSold">0</span><span class="l">Terjual</span></div>
+  </div>
+
+  <div class="map-box" id="mapBox">
+    <img id="planImg" src="" alt="Site plan" draggable="false">
+  </div>
+
+  <div class="legend">
+    <span><span class="dot" style="background:var(--available)"></span>Tersedia</span>
+    <span><span class="dot" style="background:var(--booking)"></span>Booking</span>
+    <span><span class="dot" style="background:var(--sold)"></span>Terjual</span>
+  </div>
+
+  <div class="toolbar" id="editToolbar" style="display:none;">
+    <div class="tbtn" id="addBtn">+ Tambah pin</div>
+    <div class="tbtn" id="delModeBtn">Hapus pin</div>
+  </div>
+
+  <div class="dotsize-row" id="dotSizeRow">
+    <label for="dotSizeInput">Ukuran pin</label>
+    <input type="range" id="dotSizeInput" min="6" max="30" step="1" value="13">
+    <span class="val" id="dotSizeVal">13px</span>
+  </div>
+
+  <div id="viewBar" class="toolbar">
+    <div class="tbtn" id="lockBtn">🔒 Masuk mode edit</div>
+  </div>
+
+  <div id="pinGate" class="pin-gate" style="display:none;">
+    <p class="pin-label">Masukkan PIN untuk masuk mode edit</p>
+    <div class="pin-row">
+      <input type="password" inputmode="numeric" id="pinInput" class="pin-input" placeholder="PIN" autocomplete="off">
+      <div class="tbtn" id="pinSubmit">Masuk</div>
+    </div>
+    <p class="pin-cancel" id="pinCancel">Batal</p>
+  </div>
+
+  <div id="editBar" class="toolbar" style="display:none;">
+    <div class="tbtn" id="exitEditBtn">✓ Selesai, kembali ke tampilan lihat</div>
+  </div>
+
+  <div id="realtimeBadge" style="font-size:12px;text-align:center;color:var(--ink-soft);margin:4px 0 8px;">● Menghubungkan database &amp; realtime…</div>
+  <div class="status-msg" id="statusMsg"></div>
+  <p class="hint" id="hintText">Halaman ini mode lihat saja. Ketuk "Masuk mode edit" dan masukkan PIN untuk mengubah status atau menambah/menggeser pin.</p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  // Ganti PIN di bawah ini dengan PIN pilihan Anda sendiri.
+  var EDIT_PASSCODE = '3008';
+  var SUPABASE_URL = 'https://awdpnkqyxxbluvjrqitt.supabase.co';
+  var SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_AtV2u1FSErpUT4LdG0eVdA_PU7DeLY6';
+  var supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+  var SITES = [
+      {
+        id: 'emerald1',
+        name: 'Emerald Hills tahap 1',
+        dotSize: 13,
+        storageKey: 'citraland-megah-emerald-hills-tahap-1-units-v1',
+        img: '/manus-storage/emerald-hills-tahap-1_de1d8942.jpg'
+      },
+{
+      id: 'emerald',
+      name: 'Emerald Hills tahap 2',
+      dotSize: 13,
+      storageKey: 'citraland-megah-emerald-hills-units-v1',
+      img: '/manus-storage/emerald-hills-tahap-2_a5a86bd6.jpg'
+    },
+{
+      id: 'grand',
+      name: 'Grand Hills',
+      dotSize: 13,
+      storageKey: 'citraland-megah-grand-hills-units-v1',
+      img: '/manus-storage/grand-hills_99d3b901.jpg'
+    },
+      {
+        id: 'ruko-citra-prime',
+        name: 'Ruko Citra Prime',
+        dotSize: 13,
+        storageKey: 'citraland-megah-ruko-citra-prime-units-v1',
+        img: '/manus-storage/ruko-citra-prime_6dfd7eae.jpg'
+      },
+      {
+        id: 'new-chateau',
+        name: 'New Chateau',
+        dotSize: 13,
+        storageKey: 'citraland-megah-new-chateau-units-v1',
+        img: '/manus-storage/new-chateau_e6855ca4.jpg'
+      }
+  ];
+  var siteState = {}; // id -> { units: [] }
+  SITES.forEach(function(s){ siteState[s.id] = { units: [] }; });
+
+  var currentSiteId = 'grand';
+  var mode = 'normal'; // normal | add | delete
+  var drag = null;
+  var unlocked = false;
+
+  function $(id){ return document.getElementById(id); }
+  function currentState(){ return siteState[currentSiteId]; }
+  function currentSite(){
+    for(var i=0;i<SITES.length;i++){ if(SITES[i].id===currentSiteId) return SITES[i]; }
+    return SITES[0];
+  }
+
+  function dotSizeStorageKey(site){ return 'dotsize-' + site.id; }
+
+  function loadDotSize(site){
+    try{
+      var saved = localStorage.getItem(dotSizeStorageKey(site));
+      if(saved){
+        var n = parseInt(saved, 10);
+        if(!isNaN(n)) return n;
+      }
+    }catch(e){}
+    return site.dotSize || 13;
+  }
+
+  function applyDotSize(site){
+    var size = loadDotSize(site);
+    $('mapBox').style.setProperty('--dot-size', size + 'px');
+    $('dotSizeInput').value = size;
+    $('dotSizeVal').textContent = size + 'px';
+  }
+
+  function saveDotSize(site, size){
+    site.dotSize = size;
+    try{ localStorage.setItem(dotSizeStorageKey(site), String(size)); }catch(e){}
+  }
+
+  function showMsg(text, isError){
+    var el = $('statusMsg');
+    if(!el) return;
+    el.textContent = text || '';
+    el.style.color = isError ? 'var(--sold)' : 'var(--ink-soft)';
+    if(text){
+      setTimeout(function(){ if(el.textContent===text) el.textContent=''; }, 1800);
+    }
+  }
+
+  function rowFromUnit(siteId, unit){
+    return {
+      id: unit.id,
+      site_id: siteId,
+      unit_number: unit.id,
+      x: Number(unit.x),
+      y: Number(unit.y),
+      status: unit.status,
+      updated_at: new Date().toISOString()
+    };
+  }
+
+  async function loadAllStates(){
+    var results = await Promise.all(SITES.map(function(site){
+      return supabaseClient
+        .from('site_plan_units')
+        .select('id, site_id, x, y, status')
+        .eq('site_id', site.id)
+        .order('created_at', { ascending: true });
+    }));
+
+    var hasError = false;
+    results.forEach(function(result, index){
+      var site = SITES[index];
+      if(result.error){
+        hasError = true;
+        console.error('Supabase load error:', result.error);
+        siteState[site.id] = { units: [] };
+        return;
+      }
+      siteState[site.id] = {
+        units: (result.data || []).map(function(row){
+          return { id: row.id, x: Number(row.x), y: Number(row.y), status: row.status };
+        })
+      };
+    });
+
+    renderTabs();
+    render();
+
+    if(hasError) showMsg('Sebagian data gagal dimuat dari Supabase.', true);
+  }
+
+  // Simpan SATU unit saja. Tidak menghapus/menginsert ulang seluruh cluster.
+  async function saveUnit(unit, notify){
+    var site = currentSite();
+    var result = await supabaseClient
+      .from('site_plan_units')
+      .upsert(rowFromUnit(site.id, unit), { onConflict: 'id' });
+
+    if(result.error){
+      console.error('Supabase unit save error:', result.error);
+      if(notify) showMsg('Gagal menyimpan perubahan online.', true);
+      return false;
+    }
+
+    if(notify) showMsg('Perubahan berhasil disimpan online.', false);
+    return true;
+  }
+
+  // Hapus SATU unit saja.
+  async function deleteUnit(unitId, notify){
+    var result = await supabaseClient
+      .from('site_plan_units')
+      .delete()
+      .eq('id', unitId);
+
+    if(result.error){
+      console.error('Supabase unit delete error:', result.error);
+      if(notify) showMsg('Gagal menghapus unit online.', true);
+      return false;
+    }
+
+    if(notify) showMsg('Unit berhasil dihapus online.', false);
+    return true;
+  }
+
+  // Dipertahankan agar fungsi lama tetap kompatibel.
+  async function saveCurrentState(notify){
+    var site = currentSite();
+    var rows = currentState().units.map(function(unit){
+      return rowFromUnit(site.id, unit);
+    });
+
+    if(!rows.length){
+      if(notify) showMsg('Tidak ada unit untuk disimpan.', false);
+      return true;
+    }
+
+    var result = await supabaseClient
+      .from('site_plan_units')
+      .upsert(rows, { onConflict: 'id' });
+
+    if(result.error){
+      console.error('Supabase bulk save error:', result.error);
+      if(notify) showMsg('Gagal menyimpan online. Pastikan SQL Supabase sudah dijalankan.', true);
+      return false;
+    }
+
+    if(notify) showMsg('Perubahan berhasil disimpan online.', false);
+    return true;
+  }
+
+  // Realtime: perubahan INSERT/UPDATE/DELETE dari perangkat lain
+  // langsung disinkronkan ke tampilan tanpa refresh.
+  var realtimeChannel = null;
+
+  function startRealtime(){
+    if(realtimeChannel){
+      try { supabaseClient.removeChannel(realtimeChannel); } catch(e) {}
+    }
+
+    realtimeChannel = supabaseClient
+      .channel('site-plan-units-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'site_plan_units' },
+        function(payload){
+          var row = payload.new || payload.old || {};
+
+          if(payload.eventType === 'DELETE'){
+            Object.keys(siteState).forEach(function(siteId){
+              siteState[siteId].units = siteState[siteId].units.filter(function(unit){
+                return unit.id !== row.id;
+              });
+            });
+            render();
+            return;
+          }
+
+          var siteId = row.site_id;
+          if(!siteId || !siteState[siteId]) return;
+
+          var incoming = {
+            id: row.id,
+            x: Number(row.x),
+            y: Number(row.y),
+            status: row.status
+          };
+
+          var units = siteState[siteId].units;
+          var found = false;
+
+          for(var i=0; i<units.length; i++){
+            if(units[i].id === incoming.id){
+              units[i] = incoming;
+              found = true;
+              break;
+            }
+          }
+
+          if(!found) units.push(incoming);
+
+          if(siteId === currentSiteId) render();
+          else renderTabs();
+        }
+      )
+      .subscribe(function(status){
+        var badge = $('realtimeBadge');
+
+        if(status === 'SUBSCRIBED'){
+          console.log('Supabase Realtime aktif.');
+          if(badge){
+            badge.textContent = '● Database online • Realtime aktif';
+            badge.style.color = 'seagreen';
+          }
+        }else if(status === 'CHANNEL_ERROR'){
+          console.error('Supabase Realtime channel error.');
+          if(badge){
+            badge.textContent = '● Database online • Realtime belum aktif';
+            badge.style.color = 'var(--sold)';
+          }
+          showMsg('Realtime belum aktif. Cek konfigurasi Supabase.', true);
+        }else if(status === 'TIMED_OUT'){
+          console.error('Supabase Realtime timed out.');
+          if(badge){
+            badge.textContent = '● Realtime timeout';
+            badge.style.color = 'var(--sold)';
+          }
+        }
+      });
+  }
+
+  function nextStatus(s){
+    if(s==='available') return 'booking';
+    if(s==='booking') return 'sold';
+    return 'available';
+  }
+
+  function pctFromClientXY(clientX, clientY){
+    var box = $('mapBox');
+    var rect = box.getBoundingClientRect();
+    var x = ((clientX - rect.left) / rect.width) * 100;
+    var y = ((clientY - rect.top) / rect.height) * 100;
+    x = Math.min(100, Math.max(0, x));
+    y = Math.min(100, Math.max(0, y));
+    return { x: Math.round(x*100)/100, y: Math.round(y*100)/100 };
+  }
+
+  function eventXY(e){
+    if(e.touches && e.touches.length){
+      return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }
+    if(e.changedTouches && e.changedTouches.length){
+      return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+    }
+    return { x: e.clientX, y: e.clientY };
+  }
+
+  function renderTabs(){
+    var wrap = $('siteTabs');
+    wrap.innerHTML = '';
+    SITES.forEach(function(s){
+      var el = document.createElement('div');
+      el.className = 'site-tab' + (s.id===currentSiteId ? ' active' : '');
+      el.textContent = s.name;
+      el.onclick = function(){
+        if(currentSiteId === s.id) return;
+        currentSiteId = s.id;
+        mode = 'normal';
+        renderTabs();
+        render();
+      };
+      wrap.appendChild(el);
+    });
+  }
+
+  function render(){
+    var site = currentSite();
+    $('planImg').src = site.img;
+    applyDotSize(site);
+
+    var box = $('mapBox');
+    var existing = box.querySelectorAll('.marker');
+    for(var i=0;i<existing.length;i++){ existing[i].parentNode.removeChild(existing[i]); }
+
+    var counts = { available:0, booking:0, sold:0 };
+
+    currentState().units.forEach(function(u){
+      counts[u.status] = (counts[u.status]||0) + 1;
+      var el = document.createElement('div');
+      el.className = 'marker ' + u.status;
+      el.style.left = u.x + '%';
+      el.style.top = u.y + '%';
+      el.setAttribute('data-id', u.id);
+      var dot = document.createElement('div');
+      dot.className = 'dot';
+      el.appendChild(dot);
+      attachMarkerEvents(el, u);
+      box.appendChild(el);
+    });
+
+    $('cntAvailable').textContent = counts.available || 0;
+    $('cntBooking').textContent = counts.booking || 0;
+    $('cntSold').textContent = counts.sold || 0;
+
+    $('addBtn').classList.toggle('active', mode==='add');
+    $('delModeBtn').classList.toggle('active', mode==='delete');
+
+    $('editToolbar').style.display = unlocked ? 'flex' : 'none';
+    $('dotSizeRow').classList.toggle('show', unlocked);
+    $('viewBar').style.display = unlocked ? 'none' : 'flex';
+    $('editBar').style.display = unlocked ? 'flex' : 'none';
+    $('hintText').textContent = unlocked
+      ? 'Mode "Tambah pin": ketuk gambar untuk menaruh pin baru. Pin bisa digeser kapan saja. Mode "Hapus pin": ketuk pin yang mau dihapus.'
+      : 'Halaman ini mode lihat saja. Ketuk "Masuk mode edit" dan masukkan PIN untuk mengubah status atau menambah/menggeser pin.';
+  }
+
+  function attachMarkerEvents(el, u){
+    function startDrag(e){
+      if(!unlocked) return;
+      e.stopPropagation();
+      e.preventDefault();
+      var xy = eventXY(e);
+      drag = { id: u.id, moved: false, startX: xy.x, startY: xy.y };
+    }
+    el.addEventListener('mousedown', startDrag);
+    el.addEventListener('touchstart', startDrag, { passive:false });
+  }
+
+  function onMove(e){
+    if(!drag) return;
+    var xy = eventXY(e);
+    var dx = Math.abs(xy.x - drag.startX);
+    var dy = Math.abs(xy.y - drag.startY);
+    if(dx > 3 || dy > 3) drag.moved = true;
+    if(!drag.moved) return;
+    e.preventDefault();
+    var u = null;
+    var units = currentState().units;
+    for(var i=0;i<units.length;i++){ if(units[i].id===drag.id){ u = units[i]; break; } }
+    if(!u) return;
+    var p = pctFromClientXY(xy.x, xy.y);
+    u.x = p.x; u.y = p.y;
+    var el = $('mapBox').querySelector('.marker[data-id="'+u.id+'"]');
+    if(el){
+      el.style.left = u.x + '%';
+      el.style.top = u.y + '%';
+      el.classList.add('dragging');
+    }
+  }
+
+  function onUp(e){
+    if(!drag) return;
+    if(!unlocked){ drag = null; return; }
+    var id = drag.id;
+    var moved = drag.moved;
+    drag = null;
+
+    var el = $('mapBox').querySelector('.marker[data-id="'+id+'"]');
+    if(el) el.classList.remove('dragging');
+
+    if(moved){
+      var movedUnit = null;
+      var currentUnits = currentState().units;
+      for(var mi=0; mi<currentUnits.length; mi++){
+        if(currentUnits[mi].id === id){
+          movedUnit = currentUnits[mi];
+          break;
+        }
+      }
+      if(movedUnit) saveUnit(movedUnit, true);
+      return;
+    }
+
+    var units = currentState().units;
+    var u = null;
+    for(var i=0;i<units.length;i++){ if(units[i].id===id){ u = units[i]; break; } }
+    if(!u) return;
+
+    if(mode === 'delete'){
+      currentState().units = units.filter(function(x){ return x.id !== id; });
+      deleteUnit(id, true);
+      render();
+    } else if(mode === 'normal'){
+      u.status = nextStatus(u.status);
+      saveUnit(u, true);
+      render();
+    }
+  }
+
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+  document.addEventListener('touchmove', onMove, { passive:false });
+  document.addEventListener('touchend', onUp);
+
+  function onMapTap(e){
+    if(!unlocked || mode !== 'add') return;
+    if(e.target && e.target.classList && e.target.classList.contains('marker')) return;
+    var xy = eventXY(e);
+    var p = pctFromClientXY(xy.x, xy.y);
+    var newUnit = {
+      id: 'u-' + Date.now(),
+      x: p.x,
+      y: p.y,
+      status: 'available'
+    };
+    currentState().units.push(newUnit);
+    saveUnit(newUnit, true);
+    render();
+  }
+
+  $('mapBox').addEventListener('click', onMapTap);
+
+  $('addBtn').addEventListener('click', function(){
+    mode = (mode === 'add') ? 'normal' : 'add';
+    render();
+  });
+  $('delModeBtn').addEventListener('click', function(){
+    mode = (mode === 'delete') ? 'normal' : 'delete';
+    render();
+  });
+
+  $('dotSizeInput').addEventListener('input', function(){
+    var size = parseInt(this.value, 10);
+    var site = currentSite();
+    $('mapBox').style.setProperty('--dot-size', size + 'px');
+    $('dotSizeVal').textContent = size + 'px';
+    saveDotSize(site, size);
+  });
+
+  $('lockBtn').addEventListener('click', function(){
+    $('pinGate').style.display = 'block';
+    $('viewBar').style.display = 'none';
+    $('pinInput').value = '';
+    $('pinInput').focus();
+  });
+
+  $('pinCancel').addEventListener('click', function(){
+    $('pinGate').style.display = 'none';
+    $('viewBar').style.display = 'flex';
+  });
+
+  function tryUnlock(){
+    var pin = $('pinInput').value;
+    if(pin === EDIT_PASSCODE){
+      unlocked = true;
+      $('pinGate').style.display = 'none';
+      showMsg('Mode edit aktif.', false);
+      render();
+    } else {
+      showMsg('PIN salah, coba lagi.', true);
+      $('pinInput').value = '';
+      $('pinInput').focus();
+    }
+  }
+
+  $('pinSubmit').addEventListener('click', tryUnlock);
+  $('pinInput').addEventListener('keydown', function(e){
+    if(e.key === 'Enter') tryUnlock();
+  });
+
+  $('exitEditBtn').addEventListener('click', function(){
+    unlocked = false;
+    mode = 'normal';
+    render();
+  });
+
+  window.addEventListener('error', function(evt){
+    showMsg('Terjadi masalah kecil, coba muat ulang.', true);
+  });
+
+  loadAllStates().then(function(){
+    startRealtime();
+  });
+})();
+</script>
+</body>
+</html>
