@@ -132,6 +132,143 @@ h1{font-family:'Manrope',sans-serif;font-size:24px;font-weight:800;margin:0 0 2p
 .pin-input:focus{outline:none;border-color:var(--ink);}
 #pinSubmit{flex:0 0 auto;padding:11px 18px;}
 .pin-cancel{font-size:11.5px;color:var(--ink-soft);text-decoration:underline;margin:10px 0 0;cursor:pointer;}
+
+/* Premium property dashboard preview */
+:root{
+  --bg:#f6f4ee;
+  --panel:#ffffff;
+  --ink:#173d36;
+  --ink-soft:#6c7b75;
+  --line:#e5e1d8;
+  --terracotta:#b9683e;
+  --available:#5c8a52;
+  --booking:#d39a34;
+  --sold:#ad4e43;
+}
+body{padding:28px 16px 72px;background:radial-gradient(circle at 0 0,#fffdf8 0,#f6f4ee 42%,#f2f0e8 100%);}
+.wrap{max-width:720px;}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:18px;}
+header:after{content:'● LIVE';flex:none;margin-top:5px;padding:7px 11px;border:1px solid #cfe0d0;border-radius:999px;background:#eef7ed;color:#477d49;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.04em;}
+.eyebrow{font-size:10px;letter-spacing:.14em;font-weight:700;text-transform:uppercase;color:var(--terracotta);margin-bottom:7px;}
+h1{font-size:30px;letter-spacing:-.04em;line-height:1.08;margin-bottom:7px;}
+.sub{font-size:13px;color:var(--ink-soft);}
+.site-tabs{display:flex;gap:8px;overflow-x:auto;margin:0 0 18px;padding:4px 1px 8px;scrollbar-width:none;}
+.site-tabs::-webkit-scrollbar{display:none;}
+.site-tab,.site-tab:nth-child(4),.site-tab:nth-child(5){flex:0 0 auto;grid-column:auto;padding:10px 15px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.72);font-size:11.5px;white-space:nowrap;box-shadow:0 3px 10px rgba(22,56,50,.03);}
+.site-tab.active{background:var(--ink);color:#fff;border-color:var(--ink);box-shadow:0 5px 14px rgba(23,61,54,.18);}
+.stats{gap:10px;margin:0 0 18px;}
+.stat{border:0;border-radius:16px;padding:13px 8px;background:rgba(255,255,255,.84);box-shadow:0 7px 22px rgba(22,56,50,.06);}
+.stat.available{background:#edf5eb}.stat.booking{background:#fff5dc}.stat.sold{background:#f9eae7}
+.stat .n{font-size:23px}.stat .l{font-size:9.5px;font-weight:700;letter-spacing:.07em;color:#718079;}
+.map-box{border:0;border-radius:22px;box-shadow:0 14px 38px rgba(22,56,50,.14);background:#e9e8df;}
+.map-box:before{display:none;}
+.map-box:after{display:none;}
+.legend{margin:14px 3px 3px;gap:9px;}
+.legend span{padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.72);font-size:10.5px;box-shadow:0 3px 10px rgba(22,56,50,.04);}
+.legend .dot{padding:0;background:var(--available);width:8px;height:8px;box-shadow:none;}
+.toolbar{gap:8px;margin-top:14px;}
+.tbtn{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;color:var(--ink);box-shadow:0 4px 12px rgba(22,56,50,.04);}
+.tbtn.active{background:var(--ink);border-color:var(--ink);}
+.dotsize-row{border:0;border-radius:16px;margin-top:13px;padding:12px 14px;background:rgba(255,255,255,.75);box-shadow:0 5px 18px rgba(22,56,50,.05);}
+.pin-gate{border:0;border-radius:18px;box-shadow:0 8px 24px rgba(22,56,50,.08);}
+#realtimeBadge{padding:5px 0;color:#477d49!important;font-family:'IBM Plex Mono',monospace;font-size:10px!important;}
+.status-msg{color:var(--terracotta);font-weight:600;}
+.hint{font-size:10.5px;color:#7a8781;}
+.marker{width:32px;height:32px;margin-left:-16px;margin-top:-16px;}
+.marker .dot{border:1.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.3);}
+.marker.available .dot{background:rgba(92,138,82,.94)}
+.marker.booking .dot{background:rgba(211,154,52,.92)}
+.marker.sold .dot{background:rgba(173,78,67,.94)}
+@media(max-width:520px){body{padding-top:20px}header{gap:10px}h1{font-size:26px}header:after{font-size:9px;padding:6px 8px}.stats{gap:6px}.stat{padding:11px 4px}.stat .n{font-size:20px}.stat .l{font-size:8.5px}.map-box:after{font-size:9px;bottom:10px}.legend{gap:5px}.legend span{padding:6px 7px}.marker{width:30px;height:30px;margin-left:-15px;margin-top:-15px}.marker .dot{border-width:1.5px;box-shadow:0 1px 3px rgba(0,0,0,.28)}}
+
+
+/* Mobile review fix: prevent clipped navigation and improve header balance */
+@media (max-width: 520px){
+  header{
+    display:grid;
+    grid-template-columns:58px minmax(0,1fr) auto;
+    align-items:start;
+    gap:9px;
+    margin-bottom:16px;
+  }
+  header .eyebrow{
+    grid-column:1;
+    margin-top:3px;
+    font-size:9px;
+    line-height:1.25;
+    overflow-wrap:anywhere;
+  }
+  header h1{
+    grid-column:2;
+    font-size:25px;
+    line-height:1.02;
+    margin:0;
+  }
+  header .sub{
+    grid-column:2 / 4;
+    grid-row:2;
+    margin-top:-2px;
+    font-size:11px;
+    line-height:1.35;
+  }
+  header:after{
+    grid-column:3;
+    grid-row:1;
+    margin-top:2px;
+    white-space:nowrap;
+  }
+  .site-tabs{
+    width:100%;
+    margin:0 0 18px;
+    padding:4px 14px 10px 1px;
+    gap:7px;
+    overflow-x:auto;
+    overscroll-behavior-x:contain;
+    scroll-snap-type:x proximity;
+    -webkit-mask-image:linear-gradient(to right, transparent 0, #000 7px, #000 calc(100% - 20px), transparent 100%);
+    mask-image:linear-gradient(to right, transparent 0, #000 7px, #000 calc(100% - 20px), transparent 100%);
+  }
+  .site-tab,.site-tab:nth-child(4),.site-tab:nth-child(5){
+    scroll-snap-align:start;
+    font-size:10.5px;
+    padding:9px 13px;
+  }
+  .stats{margin-bottom:16px;}
+  .map-box:after{display:none;}
+  .legend{margin-top:12px;}
+}
+
+
+/* Clean fixed 3 + 2 cluster layout and compact branded header */
+.eyebrow{font-size:10px;letter-spacing:.14em;font-weight:700;text-transform:uppercase;}
+header{display:grid;grid-template-columns:1fr auto;grid-template-areas:"brand live" "title title" "sub sub";align-items:start;gap:7px 14px;margin-bottom:18px;}
+header .eyebrow{grid-area:brand;margin:4px 0 0;}
+header h1{grid-area:title;font-size:30px;letter-spacing:-.04em;line-height:1.05;margin:0;}
+header .sub{grid-area:sub;font-size:12px;margin:0;color:var(--ink-soft);}
+header:after{grid-area:live;margin:0;padding:6px 10px;font-size:10px;align-self:start;}
+.site-tabs{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:0 0 18px;padding:3px 0 5px;overflow:visible;}
+.site-tab,.site-tab:nth-child(4),.site-tab:nth-child(5){grid-column:span 2;min-width:0;padding:10px 5px;border-radius:12px;font-size:clamp(9px,2.5vw,12px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.site-tab:nth-child(4){grid-column:2 / span 2;}
+.site-tab:nth-child(5){grid-column:4 / span 2;}
+@media(max-width:520px){
+  header{grid-template-columns:1fr auto;grid-template-areas:"brand live" "title title" "sub sub";gap:7px 10px;margin-bottom:14px;}
+  header .eyebrow{font-size:9px;line-height:1.2;max-width:180px;}
+  header h1{font-size:25px;line-height:1.05;}
+  header .sub{font-size:10.5px;line-height:1.35;}
+  header:after{font-size:9px;padding:6px 9px;}
+  .site-tabs{grid-template-columns:repeat(6,1fr);gap:7px;margin-bottom:16px;padding:2px 0 4px;overflow:visible;mask-image:none;-webkit-mask-image:none;}
+  .site-tab,.site-tab:nth-child(4),.site-tab:nth-child(5){padding:9px 3px;border-radius:11px;font-size:9.5px;}
+  .stats{margin-bottom:16px;}
+}
+
+
+/* Realtime connection badge */
+header:after{content:'● CONNECTING';background:#fff5dc;border-color:#f0d89c;color:#a87516;}
+header.is-live:after{content:'● LIVE';background:#eef7ed;border-color:#cfe0d0;color:#477d49;animation:livePulse 1.6s ease-in-out infinite;}
+header.is-offline:after{content:'● OFFLINE';background:#fae8e6;border-color:#e5b9b3;color:#ad4e43;animation:none;}
+@keyframes livePulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(71,125,73,.18)}50%{opacity:.55;box-shadow:0 0 0 5px rgba(71,125,73,0)}}
+@media (prefers-reduced-motion:reduce){header.is-live:after{animation:none;}}
+
 </style>
 </head>
 <body>
@@ -139,7 +276,7 @@ h1{font-family:'Manrope',sans-serif;font-size:24px;font-weight:800;margin:0 0 2p
   <header>
     <p class="eyebrow">CitraLand Megah Batam</p>
     <h1>Update Stock Unit</h1>
-    <p class="sub">Pilih cluster, lalu ketuk pin untuk lihat/ubah status.</p>
+    <p class="sub">Silahkan cek ketersediaan unit yang tersedia secara realtime.</p>
   </header>
 
   <div class="site-tabs" id="siteTabs"></div>
@@ -152,6 +289,7 @@ h1{font-family:'Manrope',sans-serif;font-size:24px;font-weight:800;margin:0 0 2p
   </div>
 
   <div class="map-box" id="mapBox">
+    <div class="map-toolbar" aria-hidden="true"></div>
     <img id="planImg" src="" alt="Site plan" draggable="false">
   </div>
 
@@ -397,6 +535,20 @@ h1{font-family:'Manrope',sans-serif;font-size:24px;font-weight:800;margin:0 0 2p
   // langsung disinkronkan ke tampilan tanpa refresh.
   var realtimeChannel = null;
 
+  function setRealtimeStatus(state, message){
+    var badge = $('realtimeBadge');
+    var header = document.querySelector('header');
+    if(header){
+      header.classList.remove('is-live', 'is-offline');
+      if(state === 'live') header.classList.add('is-live');
+      if(state === 'offline') header.classList.add('is-offline');
+    }
+    if(badge){
+      badge.textContent = message;
+      badge.style.color = state === 'live' ? 'seagreen' : (state === 'offline' ? 'var(--sold)' : 'var(--booking)');
+    }
+  }
+
   function startRealtime(){
     if(realtimeChannel){
       try { supabaseClient.removeChannel(realtimeChannel); } catch(e) {}
@@ -448,27 +600,19 @@ h1{font-family:'Manrope',sans-serif;font-size:24px;font-weight:800;margin:0 0 2p
         }
       )
       .subscribe(function(status){
-        var badge = $('realtimeBadge');
-
         if(status === 'SUBSCRIBED'){
           console.log('Supabase Realtime aktif.');
-          if(badge){
-            badge.textContent = '● Database online • Realtime aktif';
-            badge.style.color = 'seagreen';
-          }
+          setRealtimeStatus('live', '● Database online • Realtime aktif');
         }else if(status === 'CHANNEL_ERROR'){
           console.error('Supabase Realtime channel error.');
-          if(badge){
-            badge.textContent = '● Database online • Realtime belum aktif';
-            badge.style.color = 'var(--sold)';
-          }
+          setRealtimeStatus('offline', '● Database offline • Realtime tidak aktif');
           showMsg('Realtime belum aktif. Cek konfigurasi Supabase.', true);
         }else if(status === 'TIMED_OUT'){
           console.error('Supabase Realtime timed out.');
-          if(badge){
-            badge.textContent = '● Realtime timeout';
-            badge.style.color = 'var(--sold)';
-          }
+          setRealtimeStatus('offline', '● Realtime timeout');
+        }else if(status === 'CLOSED'){
+          console.warn('Supabase Realtime channel closed.');
+          setRealtimeStatus('offline', '● Database offline • Koneksi terputus');
         }
       });
   }
