@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CitraLand Megah - Update stock Unit</title>
+<title>CitraLand Megah — Status Unit</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Manrope:wght@400;500;600;700;800&display=swap');
 
@@ -138,7 +138,7 @@ h1{font-family:'Manrope',sans-serif;font-size:24px;font-weight:800;margin:0 0 2p
 <div class="wrap">
   <header>
     <p class="eyebrow">CitraLand Megah Batam</p>
-    <h1>Update Stock Unit</h1>
+    <h1>Status Unit Kavling</h1>
     <p class="sub">Pilih cluster, lalu ketuk pin untuk lihat/ubah status.</p>
   </header>
 
@@ -246,7 +246,7 @@ h1{font-family:'Manrope',sans-serif;font-size:24px;font-weight:800;margin:0 0 2p
   var siteState = {}; // id -> { units: [] }
   SITES.forEach(function(s){ siteState[s.id] = { units: [] }; });
 
-  var currentSiteId = 'emerald2';
+  var currentSiteId = 'emerald';
   var mode = 'normal'; // normal | add | delete
   var drag = null;
   var unlocked = false;
@@ -329,9 +329,6 @@ h1{font-family:'Manrope',sans-serif;font-size:24px;font-weight:800;margin:0 0 2p
         })
       };
     });
-
-    renderTabs();
-    render();
 
     if(hasError) showMsg('Sebagian data gagal dimuat dari Supabase.', true);
   }
@@ -716,7 +713,18 @@ h1{font-family:'Manrope',sans-serif;font-size:24px;font-weight:800;margin:0 0 2p
     showMsg('Terjadi masalah kecil, coba muat ulang.', true);
   });
 
+  // Pastikan tampilan pertama selalu Emerald Hills tahap 2.
+  // Render utama dilakukan setelah semua data cluster selesai dimuat,
+  // sehingga dot tidak tampil kosong saat halaman pertama dibuka.
+  currentSiteId = 'emerald';
+  $('siteTabs').innerHTML = '<div class="site-tab active">Memuat data cluster...</div>';
+  $('mapBox').style.minHeight = '120px';
+
   loadAllStates().then(function(){
+    currentSiteId = 'emerald';
+    $('mapBox').style.minHeight = '';
+    renderTabs();
+    render();
     startRealtime();
   });
 })();
