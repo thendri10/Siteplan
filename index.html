@@ -679,7 +679,7 @@ header.is-offline:after{content:'● OFFLINE';background:#fae8e6;border-color:#e
       var el = document.createElement('div');
       el.className = 'marker ' + u.status;
       el.style.left = u.x + '%';
-      el.style.top = (u.y * (site.markerYFactor || 1)) + '%';
+      el.style.top = (u.y / (site.markerYFactor || 1)) + '%';
       el.setAttribute('data-id', u.id);
       var dot = document.createElement('div');
       dot.className = 'dot';
@@ -735,7 +735,7 @@ header.is-offline:after{content:'● OFFLINE';background:#fae8e6;border-color:#e
     var el = $('mapBox').querySelector('.marker[data-id="'+u.id+'"]');
     if(el){
       el.style.left = u.x + '%';
-      el.style.top = u.y + '%';
+      el.style.top = p.y + '%';
       el.classList.add('dragging');
     }
   }
