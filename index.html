@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CitraLand Megah — Status Unit</title>
+<title>CitraLand Megah - Update stock Unit</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Manrope:wght@400;500;600;700;800&display=swap');
 
 :root{
   --bg:#F5F2EA;
@@ -19,33 +19,35 @@
   --sold:#A6423A;
 }
 *{box-sizing:border-box;}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;padding:20px 14px 60px;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Manrope',sans-serif;padding:20px 14px 60px;}
 .wrap{max-width:640px;margin:0 auto;}
 header{margin-bottom:14px;}
 .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.03em;color:var(--terracotta);margin:0 0 4px;}
-h1{font-family:'Fraunces',serif;font-size:24px;font-weight:600;margin:0 0 2px;line-height:1.15;}
+h1{font-family:'Manrope',sans-serif;font-size:24px;font-weight:800;margin:0 0 2px;line-height:1.15;}
 .sub{color:var(--ink-soft);font-size:13px;margin:0;}
 
-.site-tabs{display:flex;gap:8px;margin:14px 0;}
+.site-tabs{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:14px 0;}
 .site-tab{
-  flex:1;
+  grid-column:span 2;
   padding:9px 5px;
   border-radius:10px;
   border:1.5px solid var(--line);
   background:var(--panel);
   color:var(--ink-soft);
-  font-family:'Fraunces',serif;
-  font-weight:600;
+  font-family:'Manrope',sans-serif;
+  font-weight:700;
   font-size:clamp(10px,2.8vw,14px);
   line-height:1.15;
   text-align:center;
   cursor:pointer;
 }
 .site-tab.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+.site-tab:nth-child(4){grid-column:2 / span 2;}
+.site-tab:nth-child(5){grid-column:4 / span 2;}
 
 .stats{display:flex;gap:8px;margin:16px 0;}
-.stat{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 6px;text-align:center;}
-.stat .n{font-family:'Fraunces',serif;font-size:20px;font-weight:600;display:block;}
+.stat{flex:1;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 5px;text-align:center;}
+.stat .n{font-family:'Manrope',sans-serif;font-size:20px;font-weight:800;display:block;}
 .stat .l{font-size:10.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em;}
 .stat.available .n{color:var(--available);}
 .stat.booking .n{color:var(--booking);}
@@ -76,11 +78,12 @@ h1{font-family:'Fraunces',serif;font-size:24px;font-weight:600;margin:0 0 2px;li
 .marker.sold .dot{background:var(--sold);}
 .marker.dragging .dot{width:calc(var(--dot-size,13px) + 6px);height:calc(var(--dot-size,13px) + 6px);opacity:.85;}
 
-.dotsize-row{display:none;align-items:center;gap:10px;margin-top:10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;}
-.dotsize-row.show{display:flex;}
-.dotsize-row label{font-size:12px;color:var(--ink-soft);white-space:nowrap;}
-.dotsize-row input[type="range"]{flex:1;}
-.dotsize-row .val{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink);width:28px;text-align:right;}
+.dotsize-row{display:flex;align-items:center;gap:10px;margin-top:10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;}
+.dotsize-content{display:flex;flex-direction:column;gap:3px;min-width:145px;}
+.dotsize-content label{font-size:12px;color:var(--ink);font-weight:600;white-space:nowrap;}
+.dotsize-content small{font-size:10px;line-height:1.3;color:var(--ink-soft);}
+.dotsize-row input[type="range"]{flex:1;accent-color:var(--ink);}
+.dotsize-row .val{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink);width:38px;text-align:right;}
 
 .legend{display:flex;gap:12px;font-size:11.5px;color:var(--ink-soft);margin:12px 2px 4px;flex-wrap:wrap;}
 .legend span{display:inline-flex;align-items:center;gap:5px;}
@@ -94,7 +97,7 @@ h1{font-family:'Fraunces',serif;font-size:24px;font-weight:600;margin:0 0 2px;li
   border:1.5px solid var(--line);
   background:var(--panel);
   color:var(--ink);
-  font-family:'Inter',sans-serif;
+  font-family:'Manrope',sans-serif;
   font-size:12.5px;
   font-weight:500;
   cursor:pointer;
@@ -135,13 +138,14 @@ h1{font-family:'Fraunces',serif;font-size:24px;font-weight:600;margin:0 0 2px;li
 <div class="wrap">
   <header>
     <p class="eyebrow">CitraLand Megah Batam</p>
-    <h1>Status Unit Kavling</h1>
+    <h1>Update Stock Unit</h1>
     <p class="sub">Pilih cluster, lalu ketuk pin untuk lihat/ubah status.</p>
   </header>
 
   <div class="site-tabs" id="siteTabs"></div>
 
   <div class="stats">
+    <div class="stat total"><span class="n" id="cntTotal">0</span><span class="l">Total Unit</span></div>
     <div class="stat available"><span class="n" id="cntAvailable">0</span><span class="l">Tersedia</span></div>
     <div class="stat booking"><span class="n" id="cntBooking">0</span><span class="l">Booking</span></div>
     <div class="stat sold"><span class="n" id="cntSold">0</span><span class="l">Terjual</span></div>
@@ -162,14 +166,17 @@ h1{font-family:'Fraunces',serif;font-size:24px;font-weight:600;margin:0 0 2px;li
     <div class="tbtn" id="delModeBtn">Hapus pin</div>
   </div>
 
-  <div class="dotsize-row" id="dotSizeRow">
-    <label for="dotSizeInput">Ukuran pin</label>
-    <input type="range" id="dotSizeInput" min="6" max="30" step="1" value="13">
-    <span class="val" id="dotSizeVal">13px</span>
-  </div>
-
   <div id="viewBar" class="toolbar">
     <div class="tbtn" id="lockBtn">🔒 Masuk mode edit</div>
+  </div>
+
+  <div class="dotsize-row" id="dotSizeRow">
+    <div class="dotsize-content">
+      <label for="dotSizeInput">Ukuran dot pin</label>
+      <small>Geser slider untuk memperbesar atau memperkecil dot pada peta.</small>
+    </div>
+    <input type="range" id="dotSizeInput" min="6" max="30" step="1" value="13">
+    <span class="val" id="dotSizeVal">13px</span>
   </div>
 
   <div id="pinGate" class="pin-gate" style="display:none;">
@@ -239,7 +246,7 @@ h1{font-family:'Fraunces',serif;font-size:24px;font-weight:600;margin:0 0 2px;li
   var siteState = {}; // id -> { units: [] }
   SITES.forEach(function(s){ siteState[s.id] = { units: [] }; });
 
-  var currentSiteId = 'grand';
+  var currentSiteId = 'emerald2';
   var mode = 'normal'; // normal | add | delete
   var drag = null;
   var unlocked = false;
@@ -538,6 +545,7 @@ h1{font-family:'Fraunces',serif;font-size:24px;font-weight:600;margin:0 0 2px;li
       box.appendChild(el);
     });
 
+    $('cntTotal').textContent = (counts.available || 0) + (counts.booking || 0) + (counts.sold || 0);
     $('cntAvailable').textContent = counts.available || 0;
     $('cntBooking').textContent = counts.booking || 0;
     $('cntSold').textContent = counts.sold || 0;
@@ -546,7 +554,7 @@ h1{font-family:'Fraunces',serif;font-size:24px;font-weight:600;margin:0 0 2px;li
     $('delModeBtn').classList.toggle('active', mode==='delete');
 
     $('editToolbar').style.display = unlocked ? 'flex' : 'none';
-    $('dotSizeRow').classList.toggle('show', unlocked);
+    $('dotSizeRow').style.display = 'flex';
     $('viewBar').style.display = unlocked ? 'none' : 'flex';
     $('editBar').style.display = unlocked ? 'flex' : 'none';
     $('hintText').textContent = unlocked
